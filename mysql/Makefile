@@ -1,18 +1,20 @@
 include .env
 -include .env.local
 
-MYSQL_IMAGE=mysql
-MYSQL_VERSION=8.0
-DOCKER_PREFIX=app
-DOCKER_NAME="${DOCKER_PREFIX}-mysql"
-DOCKER_VOLUME="${DOCKER_PREFIX}-mysql-data"
+APP_NAME=app
 
-mysql-pull:
-	docker pull "${MYSQL_IMAGE}":"${MYSQL_VERSION}"
+DOCKER_IMAGE=mysql
+DOCKER_TAG=8.0
 
-mysql-run:
+DOCKER_CONTAINER=${APP_NAME}-${DOCKER_IMAGE}-${DOCKER_TAG}
+DOCKER_VOLUME=${DOCKER_CONTAINER}-data
+
+pull:
+	docker pull "${DOCKER_IMAGE}:${DOCKER_TAG}"
+
+run:
 	docker volume create "${DOCKER_VOLUME}"
-	docker run --name "${DOCKER_NAME}" \
+	docker run --name "${DOCKER_CONTAINER}" \
 		--detach \
 		--env MYSQL_DATABASE="${DB_NAME}" \
 		--env MYSQL_PASSWORD="${DB_PASS}" \
@@ -21,13 +23,13 @@ mysql-run:
 		--rm \
 		--user `id -u`:`id -g` \
 		--volume "${DOCKER_VOLUME}":/var/lib/mysql \
-		"${MYSQL_IMAGE}":"${MYSQL_VERSION}" \
+		"${DOCKER_IMAGE}:${DOCKER_TAG}" \
 		--character-set-server=utf8mb4 \
 		--collation-server=utf8mb4_unicode_ci \
 	;
 
-mysql-exec:
-	docker exec -it "${DOCKER_NAME}" mysql \
+exec:
+	docker exec -it "${DOCKER_CONTAINER}" mysql \
 		--host="${DB_HOST}" \
 		--password="${DB_PASS}" \
 		--port="${DB_PORT}" \
@@ -35,11 +37,11 @@ mysql-exec:
 		"${DB_NAME}" \
 	;
 
-mysql-stop:
-	docker stop "${DOCKER_NAME}"
+stop:
+	docker stop "${DOCKER_CONTAINER}"
 
-mysql-rmi:
-	docker rmi "${MYSQL_IMAGE}":"${MYSQL_VERSION}"
+rmi:
+	docker rmi "${DOCKER_IMAGE}:${DOCKER_TAG}"
 
-mysql-volume-rm:
+volume-rm:
 	docker volume rm "${DOCKER_VOLUME}"
