@@ -2,6 +2,7 @@ include .env
 -include .env.local
 
 APP_NAME=app
+
 DOCKER_IMAGE=postgres
 DOCKER_TAG=14.2
 
